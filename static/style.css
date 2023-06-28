@@ -1,0 +1,49 @@
+/* Defina a altura e a largura do mapa como 100% da janela */
+html, body, #map {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.red-marker {
+  background-image: url('https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png');
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.blue-marker {
+  background-image: url('https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png');
+  display: inline-block;
+  margin-right: 5px;
+  color: aliceblue;
+}
+
+.legenda {
+  padding: 6px 8px;
+  font: 14px Arial, Helvetica, sans-serif;
+  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  /*box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);*/
+  /*border-radius: 5px;*/
+  line-height: 24px;
+  color: #555;
+}
+
+.legenda span {
+  position: relative;
+  bottom: 3px;
+}
+
+.legenda i {
+  width: 18px;
+  height: 18px;
+  float: left;
+  margin: 0 8px 0 0;
+  opacity: 0.7;
+}
+
+.legenda i.icon {
+  background-size: 18px;
+  background-color: rgba(255, 255, 255, 1);
+}

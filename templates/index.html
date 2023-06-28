@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mapa do Mundo</title>
+    <!-- Inclua as bibliotecas do Leaflet para exibir o mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- Inclua a biblioteca Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <h1 class="text-2xl font-bold my-4">Mapa do Mundo</h1>
+
+    <!-- Adicione o menu de filtros usando classes do Tailwind CSS -->
+    <div class="container mx-auto my-4">
+        <form id="filterForm" class="flex items-center">
+            <div class="w-1/4 mr-4">
+                <label for="countryFilter" class="block font-bold mb-2">País:</label>
+                <select class="w-full px-2 py-1 border border-gray-300 rounded">
+                    <option value="">Todos</option>
+                    <!-- Preencha as opções do filtro de país dinamicamente -->
+                    <!-- {% for dado in dados %}
+                        <option value="{{ dado.pais }}">{{ dado.pais }}</option>
+                    {% endfor %} -->
+                </select>
+            </div>
+            <div class="w-1/4 mr-4">
+                <label for="dateFilter" class="block font-bold mb-2">Data:</label>
+                <input type="date" class="w-full px-2 py-1 border border-gray-300 rounded">
+            </div>
+            <div class="w-1/4 mr-4">
+                <label for="typeFilter" class="block font-bold mb-2">Tipo de Acidente:</label>
+                <select class="w-full px-2 py-1 border border-gray-300 rounded">
+                    <option value="">Todos</option>
+                    <!-- Preencha as opções do filtro de tipo de acidente dinamicamente -->
+                    <!-- {% for dado in dados %}
+                        <option value="{{ dado.tipo }}">{{ dado.tipo }}</option>
+                    {% endfor %} -->
+                </select>
+            </div>
+            <div class="w-1/4">
+                <button type="submit" class="px-4 py-2 bg-orange-500 text-white font-bold rounded">Filtrar</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="map" style="height: 82vh;"></div>
+
+    <script>
+        // Crie um mapa Leaflet e defina a localização e o zoom inicial
+        var map = L.map('map').setView([0, 0], 3);
+
+        // Adicione uma camada de mapa do OpenStreetMap
+        L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3']
+        }).addTo(map);
+
+        // Itere sobre os dados e adicione marcadores ao mapa
+        {% for dado in dados %}
+            // Defina a cor do ícone com base no atributo dado.tipo
+            var iconColor = "{{ dado.tipo }}" === "Accident" ? "red" : "blue";
+
+            // Crie o ícone personalizado com a cor escolhida
+            var customIcon = L.icon({
+                iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-' + iconColor + '.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+            });
+
+            L.marker([{{ dado.latitude }}, {{ dado.longitude }}], { icon: customIcon })
+                .addTo(map)
+                .bindPopup("<b>{{ dado.descricao }}</b><br>Latitude: {{ dado.latitude }}<br>Longitude: {{ dado.longitude }}");
+        {% endfor %}
+
+        // Adicione um evento de envio ao formulário de filtro
+        document.getElementById('filterForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Obtenha os valores dos filtros selecionados
+            var country = document.getElementById('countryFilter').value;
+            var date = document.getElementById('dateFilter').value;
+            var type = document.getElementById('typeFilter').value;
+
+            // Remova todos os marcadores do mapa
+            // markersLayer.clearLayers();
+
+            // // Itere sobre os dados e adicione marcadores filtrados à camada de marcadores
+            // {% for dado in dados %}
+            //     {% if country == '' or dado.pais == country %}
+            //     {% if date == '' or dado.data == date %}
+            //     {% if type == '' or dado.tipo == type %}
+            //         var marker = L.marker([{{ dado.latitude }}, {{ dado.longitude }}]);
+            //         marker.bindPopup("<b>{{ dado.localizacao }}</b><br>{{ dado.descricao }}");
+
+            //         // Adicione o marcador à camada de marcadores
+            //         markersLayer.addLayer(marker);
+            //     {% endif %}
+            //     {% endif %}
+            //     {% endif %}
+            // {% endfor %}
+        });
+    </script>
+</body>
+</html>
