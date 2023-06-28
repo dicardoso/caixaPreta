@@ -21,11 +21,28 @@ def format_date(value, format='%d/%m/%Y'):
     date_obj = datetime.strptime(value, '%Y-%m-%d')
     return date_obj.strftime(format)
 
+def listar_paises():
+    return list(collection.aggregate([
+            {
+                '$group': {
+                    '_id': '$Country'
+                }
+            },
+            {
+                '$match': {
+                    '_id': {
+                        '$ne': None
+                    }
+                }
+            },
+            {
+                '$sort': {
+                    '_id': 1
+                }
+            }
+        ]))
 @app.route('/', methods=['GET', 'POST'])
 def filtro():
-    # dados = list(collection.aggregate([{'$limit':10}]))
-    dados = collection.find()
-    print([dados])
     if request.method == 'POST':
         filtro_pais = request.form.get('filtro_pais')
         filtro_tipo = request.form.get('filtro_tipo')
@@ -33,12 +50,16 @@ def filtro():
         filtro_ate = request.form.get('filtro_ate')
         
         resultados_filtrados = filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate)
-        return render_template('index2.html', resultados=resultados_filtrados, filtro_de=filtro_de, filtro_ate=filtro_ate)
 
-    return render_template('index2.html', resultados=dados[:1000])
+        # Consulta ao MongoDB para obter a lista de países
+        paises = listar_paises()
+
+        return render_template('index.html', resultados=resultados_filtrados, filtro_pais=filtro_pais, filtro_tipo=filtro_tipo, filtro_de=filtro_de, filtro_ate=filtro_ate, paises=paises)
+
+    return render_template('index.html')
 
 def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate):
-    pipeline = [{'$limit': 1000}]
+    pipeline = [{'$limit': 8000}]
     
     # Etapa de filtro por país
     if filtro_pais != 'todos':
