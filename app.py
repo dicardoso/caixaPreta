@@ -10,8 +10,8 @@ mongo_uri = "mongodb+srv://dicardoso:diogo123@mestradocluster.w3th7tl.mongodb.ne
 documents = []
 try:
     client = MongoClient(mongo_uri, tls=True)
-    db = client['temp']
-    collection = db["crash"]
+    db = client['airplaneCrash']
+    event = db["event"]
 except Exception as e:
     print("Erro de conexão:", e)
 
@@ -22,7 +22,7 @@ def format_date(value, format='%d/%m/%Y'):
     return date_obj.strftime(format)
 
 def listar_paises():
-    return list(collection.aggregate([
+    return list(event.aggregate([
             {
                 '$group': {
                     '_id': '$Country'
@@ -59,25 +59,38 @@ def filtro():
     return render_template('index.html')
 
 def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate):
-    pipeline = [{'$limit': 8000}]
-    
+    pipeline = []
+
     # Etapa de filtro por país
     if filtro_pais != 'todos':
         pipeline.append({'$match': {'Country': filtro_pais}})
-    
+
     # Etapa de filtro por tipo
     if filtro_tipo != 'todos':
         pipeline.append({'$match': {'InvestigationType': filtro_tipo}})
-    
-   # Etapa de filtro por data "de" e/ou "até"
+
+    # Etapa de filtro por data "de" e/ou "até"
     if filtro_de:
         pipeline.append({'$match': {'EventDate': {'$gte': filtro_de}}})
-    
+
     if filtro_ate:
         pipeline.append({'$match': {'EventDate': {'$lte': filtro_ate}}})
-    
+
+    # Etapa de $lookup com a coleção Injury
+    pipeline.append({
+        '$lookup': {
+            'from': 'injury',
+            'localField': 'EventCode',
+            'foreignField': 'EventCode',
+            'as': 'injury_details'
+        }
+    })
+
+    # Etapa de limite de documentos
+    pipeline.append({'$limit': 8000})
+
     # Executa a consulta de agregação
-    resultados = collection.aggregate(pipeline)
+    resultados = event.aggregate(pipeline)
 
     return [doc for doc in resultados]
 

@@ -99,10 +99,17 @@
 
             // Itere sobre os resultados e adicione círculos ou marcadores ao mapa
             {% for dado in resultados %}
+            {% if dado.injury_details %}
                 // Verifique se os valores existem ou são nulos
-                var totalUninjured = {{ dado.TotalUninjured if dado.TotalUninjured else 0 }};
-                var totalMinorInjuries = {{ dado.TotalMinorInjuries if dado.TotalMinorInjuries else 0 }};
-                var totalFatalInjuries = {{ dado.TotalFatalInjuries if dado.TotalFatalInjuries else 0 }};
+                var totalUninjured = {{ dado.injury_details[0].TotalUninjured if dado.injury_details[0].TotalUninjured else 0 }};
+                var totalMinorInjuries = {{ dado.injury_details[0].TotalMinorInjuries if dado.injury_details[0].TotalMinorInjuries else 0 }};
+                var totalFatalInjuries = {{ dado.injury_details[0].TotalFatalInjuries if dado.injury_details[0].TotalFatalInjuries else 0 }};
+            {% else %}
+                // Caso não haja detalhes de lesões, defina os valores como zero
+                var totalUninjured = 0;
+                var totalMinorInjuries = 0;
+                var totalFatalInjuries = 0;
+            {% endif %}
 
                 // Formate a data usando strftime
                 var eventDate = new Date("{{ dado.EventDate }}");
@@ -126,15 +133,15 @@
                     // Crie um círculo para representar a área
                     var circle = L.circle([{{ dado.Latitude }}, {{ dado.Longitude }}], {
                         radius: 300, // Defina o raio do círculo de acordo com suas necessidades
-                        color: "{{ dado.InvestigationType }}" === "Accident" ? "red" : "blue",
+                        color: "{{ dado.injury_details[0].TotalFatalInjuries }}" > 0 ? "red" : "blue",
                         fillOpacity: 0.5
                     }).addTo(marcadores);
 
                     // Adicione uma pop-up ao círculo
                     circle.bindPopup(popup);
                 } else {
-                    // Defina a cor do ícone com base no atributo dado.InvestigationType
-                    var iconColor = "{{ dado.InvestigationType }}" === "Accident" ? "red" : "blue";
+                    // Defina a cor do ícone com base no atributo dado.injury_details[0].TotalFatalInjuries
+                    var iconColor = "{{ dado.injury_details[0].TotalFatalInjuries }}" > 0 ? "red" : "blue";
 
                     // Crie o ícone personalizado com a cor escolhida
                     var customIcon = L.icon({
