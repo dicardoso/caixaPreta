@@ -41,6 +41,11 @@ def listar_paises():
                 }
             }
         ]))
+
+@app.route('/dash', methods=['GET', 'POST'])
+def dash():
+    return render_template('chart.html')
+
 @app.route('/', methods=['GET', 'POST'])
 def filtro():
     if request.method == 'POST':
