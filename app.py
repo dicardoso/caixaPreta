@@ -92,7 +92,7 @@ def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate):
     })
 
     # Etapa de limite de documentos
-    pipeline.append({'$limit': 7000})
+    pipeline.append({'$limit': 4000})
 
     # Executa a consulta de agregação
     resultados = event.aggregate(pipeline)

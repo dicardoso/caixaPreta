@@ -31,10 +31,20 @@
             display: inline-block;
             margin-right: 5px;
         }
+        .menu:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .menu:active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
     </style>
-    <h1 class="ml-5 text-4xl font-bold my-4 text-gray-200">Caixa Preta</h1>
+    <div class="flex">
+        <h1 class="ml-5 text-4xl font-bold my-4 text-gray-200">Caixa Preta</h1>
+        <a class="menu p-1 ml-5 text-2xl my-4 text-gray-200 rounded" href="/">Home</a>
+        <a class="menu p-1 ml-5 text-2xl my-4 text-gray-200 rounded" href="dash">Dashboard</a>
+    </div>
 
-    <div class="container mx-auto my-4 flex">
+    <div class="container ml-5 mr-auto my-4 flex">
         <form id="filtro-form" method="POST" action="" class="flex items-end">
             <div class="w-1/5 mr-4">
                 <label for="filtro_pais" class="block font-bold mb-2 text-gray-200">País:</label>
