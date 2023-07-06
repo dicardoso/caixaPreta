@@ -10,8 +10,8 @@ mongo_uri = "mongodb+srv://dicardoso:diogo123@mestradocluster.w3th7tl.mongodb.ne
 documents = []
 try:
     client = MongoClient(mongo_uri, tls=True)
-    db = client['airplaneCrash']
-    event = db["event"]
+    db = client['temp']
+    event = db["crash"]
 except Exception as e:
     print("Erro de conexão:", e)
 
@@ -48,22 +48,27 @@ def dash():
 
 @app.route('/', methods=['GET', 'POST'])
 def filtro():
-    if request.method == 'POST':
-        filtro_pais = request.form.get('filtro_pais')
-        filtro_tipo = request.form.get('filtro_tipo')
-        filtro_de = request.form.get('filtro_de')
-        filtro_ate = request.form.get('filtro_ate')
+    paises = listar_paises()
+
+
+    filtro_pais = request.form.get('filtro_pais')
+    filtro_tipo = request.form.get('filtro_tipo')
+    filtro_de = request.form.get('filtro_de')
+    filtro_ate = request.form.get('filtro_ate')
+    filtro_limite = request.form.get('filtro_limite')
+    if filtro_limite is None:
+        filtro_limite = 1000
         
-        resultados_filtrados = filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate)
+    resultados_filtrados = filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate, filtro_limite)
+    # Consulta ao MongoDB para obter a lista de países
 
-        # Consulta ao MongoDB para obter a lista de países
-        paises = listar_paises()
+    return render_template('index.html', resultados=resultados_filtrados, 
+        filtro_pais=filtro_pais, filtro_tipo=filtro_tipo, filtro_de=filtro_de, 
+        filtro_ate=filtro_ate, paises=paises, limite_default=filtro_limite, total=len(resultados_filtrados))
 
-        return render_template('index.html', resultados=resultados_filtrados, filtro_pais=filtro_pais, filtro_tipo=filtro_tipo, filtro_de=filtro_de, filtro_ate=filtro_ate, paises=paises)
+    return render_template('index.html', paises=paises)
 
-    return render_template('index.html')
-
-def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate):
+def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate, filtro_limite=1000):
     pipeline = []
 
     # Etapa de filtro por país
@@ -82,17 +87,18 @@ def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate):
         pipeline.append({'$match': {'EventDate': {'$lte': filtro_ate}}})
 
     # Etapa de $lookup com a coleção Injury
-    pipeline.append({
-        '$lookup': {
-            'from': 'injury',
-            'localField': 'EventCode',
-            'foreignField': 'EventCode',
-            'as': 'injury_details'
-        }
-    })
+    # pipeline.append({
+    #     '$lookup': {
+    #         'from': 'injury',
+    #         'localField': 'EventCode',
+    #         'foreignField': 'EventCode',
+    #         'as': 'injury_details',
+    #     }
+    # })
 
     # Etapa de limite de documentos
-    pipeline.append({'$limit': 4000})
+    pipeline.append({'$limit': int(filtro_limite)})
+    print(pipeline)
 
     # Executa a consulta de agregação
     resultados = event.aggregate(pipeline)
@@ -100,4 +106,4 @@ def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate):
     return [doc for doc in resultados]
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=8080, debug=True)
