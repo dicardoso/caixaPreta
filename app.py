@@ -8,6 +8,7 @@ app = Flask(__name__)
 # Configurações do banco de dados MongoDB
 mongo_uri = "mongodb+srv://dicardoso:diogo123@mestradocluster.w3th7tl.mongodb.net/caixaPreta?retryWrites=true&w=majority"
 documents = []
+limit_items = 5000
 try:
     client = MongoClient(mongo_uri, tls=True)
     db = client['temp']
@@ -55,7 +56,7 @@ def filtro():
     filtro_ate = request.form.get('filtro_ate')
     filtro_limite = request.form.get('filtro_limite')
     if filtro_limite is None:
-        filtro_limite = 1000
+        filtro_limite = limit_items
         
     resultados_filtrados = filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate, filtro_limite)
 
@@ -65,7 +66,7 @@ def filtro():
 
     return render_template('index.html', paises=paises)
 
-def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate, filtro_limite=1000):
+def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate, filtro_limite=limit_items):
     pipeline = []
 
     if filtro_pais != 'todos' and filtro_pais != None:
