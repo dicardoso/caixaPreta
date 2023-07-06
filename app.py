@@ -49,8 +49,6 @@ def dash():
 @app.route('/', methods=['GET', 'POST'])
 def filtro():
     paises = listar_paises()
-
-
     filtro_pais = request.form.get('filtro_pais')
     filtro_tipo = request.form.get('filtro_tipo')
     filtro_de = request.form.get('filtro_de')
@@ -60,7 +58,6 @@ def filtro():
         filtro_limite = 1000
         
     resultados_filtrados = filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate, filtro_limite)
-    # Consulta ao MongoDB para obter a lista de países
 
     return render_template('index.html', resultados=resultados_filtrados, 
         filtro_pais=filtro_pais, filtro_tipo=filtro_tipo, filtro_de=filtro_de, 
@@ -71,15 +68,12 @@ def filtro():
 def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate, filtro_limite=1000):
     pipeline = []
 
-    # Etapa de filtro por país
-    if filtro_pais != 'todos':
+    if filtro_pais != 'todos' and filtro_pais != None:
         pipeline.append({'$match': {'Country': filtro_pais}})
 
-    # Etapa de filtro por tipo
-    if filtro_tipo != 'todos':
+    if filtro_tipo != 'todos' and filtro_pais != None:
         pipeline.append({'$match': {'InvestigationType': filtro_tipo}})
 
-    # Etapa de filtro por data "de" e/ou "até"
     if filtro_de:
         pipeline.append({'$match': {'EventDate': {'$gte': filtro_de}}})
 
@@ -96,11 +90,8 @@ def filtrar_dados(filtro_pais, filtro_tipo, filtro_de, filtro_ate, filtro_limite
     #     }
     # })
 
-    # Etapa de limite de documentos
     pipeline.append({'$limit': int(filtro_limite)})
-    print(pipeline)
 
-    # Executa a consulta de agregação
     resultados = event.aggregate(pipeline)
 
     return [doc for doc in resultados]
